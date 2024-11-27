@@ -430,6 +430,4 @@ void display::loop()
     draw_state++;
     if (draw_state >= 12 * 8)
         draw_state = 0;
-
-    delay(100);
 }
