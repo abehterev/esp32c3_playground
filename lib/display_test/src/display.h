@@ -13,7 +13,7 @@
 class display
 {
 private:
-    U8G2 *u8g2;
+    U8G2 u8g2;
 
     uint8_t draw_state = 0;
 
@@ -32,10 +32,11 @@ private:
     void draw(void);
 
 public:
-    display(U8G2 *u8g2);
+    display(U8G2 display);
     ~display();
 
     void loop();
+    void init();
 };
 
 
