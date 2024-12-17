@@ -7,40 +7,38 @@ Encoder::~Encoder()
     detachInterrupt(pinS2);
 }
 
-void Encoder::onEncoderS1()
+uint8_t getGrayCode(uint8_t S1, uint8_t S2)
 {
-    unsigned long interruptTime = millis();
-
-    if (interruptTime - lastEncoderTimeS1 > DEBOUNCE_DELAY && last_state_S1 == 0)
-    {
-        lastEncoderTimeS1 = interruptTime;
-        last_state_S1 = 1;
-
-        if (last_state_S2)
-        {
-            counter--;
-            Serial.printf("CCW");
-            last_state_S1 = last_state_S2 = 0;
-        }
-    }
+    return (S1 << 1) | S2;
 }
 
-void Encoder::onEncoderS2()
+void Encoder::onEncoderEvent()
 {
-    unsigned long interruptTime = millis();
+    static bool start_flag = 0;
+    uint64_t gpio = GPIO.in.val;
+    uint32_t S1 = (gpio & (1 << pinS1)) ? 1 : 0;
+    uint32_t S2 = (gpio & (1 << pinS2)) ? 1 : 0;
 
-    if (interruptTime - lastEncoderTimeS2 > DEBOUNCE_DELAY && last_state_S2 == 0)
+    gray_code = getGrayCode(S1, S2);
+    if (gray_code == 0x03)
     {
-        lastEncoderTimeS2 = interruptTime;
-        last_state_S2 = 1;
-
-        if (last_state_S1)
-        {
-            counter++;
-            Serial.printf("CW");
-            last_state_S1 = last_state_S2 = 0;
-        }
+        start_flag = 1;
+        // Serial.println("-start-");
     }
+    if (start_flag && gray_code == 0x01)
+    {
+        // Serial.println("-CW-");
+        ++counter;
+        start_flag = 0;
+    }
+    if (start_flag && gray_code == 0x02)
+    {
+        // Serial.println("-CCW-");
+        --counter;
+        start_flag = 0;
+    }
+
+    // Serial.printf("%llu - S1=%lu S2=%lu\n", ++e_counter, S1, S2);
 }
 
 void Encoder::onClick()
@@ -56,17 +54,25 @@ void Encoder::onClick()
 
 void Encoder::init()
 {
-    attachInterrupt(digitalPinToInterrupt(pinS1), std::bind(&Encoder::onEncoderS1, this), FALLING);
-    attachInterrupt(digitalPinToInterrupt(pinS2), std::bind(&Encoder::onEncoderS2, this), FALLING);
+    attachInterrupt(digitalPinToInterrupt(pinS1), std::bind(&Encoder::onEncoderEvent, this), FALLING);
+    attachInterrupt(digitalPinToInterrupt(pinS2), std::bind(&Encoder::onEncoderEvent, this), FALLING);
     attachInterrupt(digitalPinToInterrupt(pinBtn), std::bind(&Encoder::onClick, this), FALLING);
 }
 
 void Encoder::printStatus()
 {
     static int64_t last_counter = 0;
+    static uint64_t last_clicks = 0;
+
     if (last_counter != counter)
     {
         Serial.printf("CNT %lld\n", counter);
         last_counter = counter;
+    }
+
+    if (last_clicks != clicks)
+    {
+        Serial.printf("BTN %llu\n", clicks);
+        last_clicks = clicks;
     }
 }
