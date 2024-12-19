@@ -29,6 +29,7 @@ private:
     void u8g2_extra_page(uint8_t a);
     void u8g2_bitmap_overlay(uint8_t a);
     void u8g2_bitmap_modes(uint8_t transparent);
+    void draw_fill_pixels(int w);
     void draw(void);
 
 public:
@@ -36,8 +37,8 @@ public:
     ~display();
 
     void loop();
+    void test_loop(int w);
     void init();
 };
-
 
 #endif

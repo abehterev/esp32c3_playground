@@ -12,13 +12,12 @@ display::~display()
 void display::init()
 {
 
-    
-    u8g2.setI2CAddress(0x3F * 2);
+    // u8g2.setI2CAddress(0x3F * 2);
     u8g2.setBusClock(400000);
 
     u8g2.begin();
 
-    u8g2.setContrast(250);
+    u8g2.setContrast(120);
 }
 
 void display::u8g2_prepare(void)
@@ -38,6 +37,12 @@ void display::u8g2_box_frame(uint8_t a)
     u8g2.drawStr(0, 30, "drawFrame");
     u8g2.drawFrame(5, 10 + 30, 20, 10);
     u8g2.drawFrame(10 + a, 15 + 30, 30, 7);
+}
+
+void display::draw_fill_pixels(int w)
+{
+    u8g2.drawStr(0, 0, "drawFull");
+    u8g2.drawBox(0, 10, w, 54);
 }
 
 void display::u8g2_disc_circle(uint8_t a)
@@ -430,4 +435,12 @@ void display::loop()
     draw_state++;
     if (draw_state >= 12 * 8)
         draw_state = 0;
+}
+
+void display::test_loop(int w)
+{
+    u8g2.clearBuffer();
+    u8g2_prepare();
+    draw_fill_pixels(w);
+    u8g2.sendBuffer();
 }

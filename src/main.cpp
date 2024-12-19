@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <U8g2lib.h>
 
-// #include <display.h>
+#include <display.h>
 // #include <scanner.h>
 #include <encoder.h>
 
@@ -19,7 +19,10 @@ const int encS2Pin = GPIO_NUM_1;
 
 // U8G2_ST7567_ENH_DG128064I_F_HW_I2C u8g2(U8G2_R2, SCL, SDA, U8X8_PIN_NONE);
 
-// display myDisplay(U8G2_ST7567_ENH_DG128064I_F_HW_I2C(U8G2_R2, SCL, SDA, U8X8_PIN_NONE)); // U8G2_ST7567_ENH_DG128064I_F_HW_I2C u8g2(U8G2_R2, SCL, SDA, U8X8_PIN_NONE);
+// U8G2_ST7567_ENH_DG128064I_F_HW_I2C u8g2(U8G2_R2, SCL, SDA, U8X8_PIN_NONE);
+// U8G2_ST7567_ENH_DG128064I_F_HW_I2C(U8G2_R2, SCL, SDA, U8X8_PIN_NONE)
+
+display myDisplay(U8G2_SH1106_128X64_NONAME_F_HW_I2C(U8G2_R0, SCL, SDA, U8X8_PIN_NONE));
 
 Encoder myEncoder(encS1Pin, encS2Pin, encButtonPin);
 
@@ -38,12 +41,26 @@ void setup()
 
   // scanner.scan();
 
-  // myDisplay.init();
+  myDisplay.init();
 }
 
 void loop()
 {
+
+  static int width = 128;
+
   myEncoder.printStatus();
+
+  int enc, btn;
+
+  std::tie(enc, btn) = myEncoder.getStatus();
+
+  if (width + enc <= 128 && width + enc >= 0)
+  {
+    width += enc;
+  }
+
+  myEncoder.loop();
 
   // if ((last_counter != counter) || (last_clicks < clicks))
   // {
@@ -53,5 +70,6 @@ void loop()
   // }
   // delay(50);
 
-  // myDisplay.loop();
+  myDisplay.loop();
+  // delay(100);
 }

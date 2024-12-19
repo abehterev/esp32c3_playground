@@ -45,7 +45,7 @@ void Encoder::onClick()
 {
     unsigned long interruptTime = millis();
 
-    if (interruptTime - lastBtnTime > DEBOUNCE_DELAY)
+    if (interruptTime - lastBtnTime > DEBOUNCE_DELAY_BTN)
     {
         lastBtnTime = interruptTime;
         clicks++;
@@ -61,18 +61,28 @@ void Encoder::init()
 
 void Encoder::printStatus()
 {
-    static int64_t last_counter = 0;
-    static uint64_t last_clicks = 0;
-
     if (last_counter != counter)
     {
         Serial.printf("CNT %lld\n", counter);
-        last_counter = counter;
     }
 
     if (last_clicks != clicks)
     {
         Serial.printf("BTN %llu\n", clicks);
-        last_clicks = clicks;
     }
+}
+
+void Encoder::syncCounters()
+{
+    last_counter = counter;
+    last_clicks = clicks;
+}
+
+std::tuple<int, int> Encoder::getStatus()
+{
+    return std::make_tuple(counter - last_counter, clicks - last_clicks);
+}
+
+void Encoder::loop(){
+    syncCounters();
 }
