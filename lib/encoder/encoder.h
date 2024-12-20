@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <FunctionalInterrupt.h>
 
-#define DEBOUNCE_DELAY_BTN 50
+#define DEBOUNCE_DELAY_BTN 500
 
 class Encoder
 {
@@ -43,6 +43,8 @@ public:
     void loop();
 
     void printStatus();
+    std::pair<int,int> Rotating();
+    bool Clicking();
     std::tuple<int, int> getStatus();
 
     void ARDUINO_ISR_ATTR onEncoderEvent();

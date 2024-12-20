@@ -1,25 +1,5 @@
 #include "display.h"
 
-display::display(U8G2 display)
-{
-    u8g2 = display;
-}
-
-display::~display()
-{
-}
-
-void display::init()
-{
-
-    // u8g2.setI2CAddress(0x3F * 2);
-    u8g2.setBusClock(400000);
-
-    u8g2.begin();
-
-    u8g2.setContrast(120);
-}
-
 void display::u8g2_prepare(void)
 {
     u8g2.setFont(u8g2_font_6x10_tf);
@@ -424,7 +404,7 @@ void display::draw(void)
     }
 }
 
-void display::loop()
+void display::demo_loop()
 {
     // Serial.println(draw_state);
     u8g2.clearBuffer();
@@ -435,12 +415,4 @@ void display::loop()
     draw_state++;
     if (draw_state >= 12 * 8)
         draw_state = 0;
-}
-
-void display::test_loop(int w)
-{
-    u8g2.clearBuffer();
-    u8g2_prepare();
-    draw_fill_pixels(w);
-    u8g2.sendBuffer();
 }

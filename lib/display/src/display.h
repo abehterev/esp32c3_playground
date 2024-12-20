@@ -2,6 +2,7 @@
 #define display_h
 
 #include <U8g2lib.h>
+#include <MUIU8g2.h>
 
 #ifdef U8X8_HAVE_HW_SPI
 #include <SPI.h>
@@ -14,9 +15,13 @@ class display
 {
 private:
     U8G2 u8g2;
+    MUIU8G2 mui;
 
     uint8_t draw_state = 0;
 
+    void draw_main_screen();
+
+    // demo funcs
     void u8g2_prepare(void);
     void u8g2_box_frame(uint8_t a);
     void u8g2_disc_circle(uint8_t a);
@@ -36,9 +41,12 @@ public:
     display(U8G2 display);
     ~display();
 
-    void loop();
-    void test_loop(int w);
     void init();
+    void mui_init();
+
+    void demo_loop();
+    void test_loop(int w);
+    void mui_loop(int enc, bool click);
 };
 
 #endif

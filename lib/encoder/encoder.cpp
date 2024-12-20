@@ -78,6 +78,15 @@ void Encoder::syncCounters()
     last_clicks = clicks;
 }
 
+std::pair<int,int> Encoder::Rotating() {
+    /* count, speed */
+    return std::make_pair(counter - last_counter, 0);
+}
+
+bool Encoder::Clicking() {
+    return clicks - last_clicks > 0;
+}
+
 std::tuple<int, int> Encoder::getStatus()
 {
     return std::make_tuple(counter - last_counter, clicks - last_clicks);

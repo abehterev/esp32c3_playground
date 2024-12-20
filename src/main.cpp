@@ -30,18 +30,27 @@ void setup()
 {
 
   Serial.begin(115200);
+  int cnt = 0;
+  while (!Serial) {
+    ++cnt;
+  }
 
   delay(1000);
-
-  Serial.println("System ready");
+  Serial.printf("cnt: %d\n");
 
   myEncoder.init();
+  myDisplay.init();
+  myDisplay.mui_init();
+
+  Serial.println("init completed");
+
+  // delay(2000);
+
+  // Serial.println("System ready");
 
   // i2c_scanner scanner;
 
   // scanner.scan();
-
-  myDisplay.init();
 }
 
 void loop()
@@ -49,27 +58,49 @@ void loop()
 
   static int width = 128;
 
-  myEncoder.printStatus();
+  int enc, speed = 0;
+  bool click = false;
 
-  int enc, btn;
-
-  std::tie(enc, btn) = myEncoder.getStatus();
-
-  if (width + enc <= 128 && width + enc >= 0)
-  {
-    width += enc;
-  }
-
+  std::tie(enc, speed) = myEncoder.Rotating();
+  click = myEncoder.Clicking();
+  // myEncoder.printStatus();
   myEncoder.loop();
 
-  // if ((last_counter != counter) || (last_clicks < clicks))
-  // {
-  //   Serial.printf("Btn = %llu, Enc = %lld\n", clicks, counter);
-  //   last_counter = counter;
-  //   last_clicks = clicks;
-  // }
-  // delay(50);
+  // myDisplay.loop();
 
-  myDisplay.loop();
+  // if (enc != 0 || click)
+  // {
+  //   Serial.printf("ENC: %d, CL: %d\n", enc, click);
+  // }
+
+  int shift = 0;
+  switch (enc)
+  {
+  case abs(2):
+    shift = enc * 5;
+    break;
+  case abs(3):
+    shift = enc * 10;
+    break;
+  case abs(4):
+    shift = enc * 20;
+    break;
+
+  default:
+    shift = enc;
+    break;
+  }
+
+  int new_width = width + shift;
+  if (new_width > 128)
+    new_width = 128;
+  else if (new_width < 0)
+    new_width = 0;
+
+  width = new_width;
+
+  // myDisplay.test_loop(width);
+  myDisplay.mui_loop(enc, click);
+
   // delay(100);
 }
