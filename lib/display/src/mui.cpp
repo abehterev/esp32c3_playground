@@ -1,22 +1,189 @@
 #include "display.h"
 
-void display::mui_init()
+uint8_t mui_hrule(mui_t *ui, uint8_t msg)
 {
-    static muif_t muif_list[] = {
-        MUIF_U8G2_FONT_STYLE(0, u8g2_font_helvR08_tr), /* define style 0 */
-        MUIF_U8G2_LABEL(),                             /* allow MUI_LABEL command */
-        MUIF_BUTTON("BN", mui_u8g2_btn_exit_wm_fi)     /* define exit button */
-    };
+  u8g2_t *u8g2 = mui_get_U8g2(ui);
+  switch(msg)
+  {
+    case MUIF_MSG_DRAW:
+      u8g2_DrawFrame(u8g2,0,0,u8g2_GetDisplayWidth(u8g2), u8g2_GetDisplayHeight(u8g2));
+      u8g2_DrawHLine(u8g2, 0, mui_get_y(ui), u8g2_GetDisplayWidth(u8g2));
+      break;
+  }
+  return 0;
+}
 
-    static fds_t fds_data[] =                /* Don't use comma between the commands! */
-        MUI_FORM(1)                          /* This will start the definition of form 1 */
-        MUI_STYLE(0)                         /* select the font defined with style 0 */
-        MUI_LABEL(5, 15, "Hello U8g2")       /* place text at postion x=5, y=15 */
-        MUI_XYT("BN", 64, 30, " Select Me ") /* place a button at pos x=64, y=30 */
+    uint8_t blink_light = 4; // brightness
+    uint8_t blink_time = 1;
+    uint8_t blink_duty = 1;
+
+    uint8_t blink_state = 0;
+    long blink_last_update = 0;
+
+
+ fds_t fds_data[] = 
+
+        MUI_FORM(1)
+        MUI_STYLE(1)
+        MUI_LABEL(5, 1, "MUI Blink")
+        MUI_STYLE(0)
+        MUI_XY("HR", 0,11)
+        MUI_DATA("GP", 
+            MUI_10 "Numeric (MSE)|"
+            MUI_12 "Progress Bar (MSE)|"
+            MUI_14 "Progress Pie (MSE)|"
+            MUI_20 "Numeric (MUD)|"
+            MUI_22 "Progress Bar (MUD)|"
+            MUI_24 "Progress Pie (MUD)")
+        MUI_XYA("GC", 5, 17, 0) 
+        MUI_XYA("GC", 5, 29, 1) 
+        MUI_XYA("GC", 5, 41, 2) 
+        MUI_XYA("GC", 5, 53, 3) 
+
+        MUI_FORM(10)
+        MUI_STYLE(1)
+        MUI_LABEL(5, 1, "Numeric (MSE)")
+        MUI_STYLE(0)
+        MUI_XY("HR", 0,11)
+        MUI_LABEL(5,17, "Light:")
+        MUI_LABEL(5,29, "Time:")
+        MUI_LABEL(5,41, "Duty:")
+        MUI_XY("NB", 50, 17)
+        MUI_XY("NT", 50, 29)
+        MUI_XY("ND", 50, 41)
+        MUI_XYAT("GO", 20, 53, 1, " Exit ") 
+
+        MUI_FORM(12)
+        MUI_STYLE(1)
+        MUI_LABEL(5, 1, "Bar Graph (MSE)")
+        MUI_STYLE(0)
+        MUI_XY("HR", 0,11)
+        MUI_LABEL(5,17, "Light:")
+        MUI_LABEL(5,29, "Time:")
+        MUI_LABEL(5,41, "Duty:")
+        MUI_XY("BB", 50, 17)
+        MUI_XY("BT", 50, 29)
+        MUI_XY("BD", 50, 41)
+        MUI_XYAT("GO", 60, 50, 1, " Exit ") 
+
+        MUI_FORM(14)
+        MUI_STYLE(1)
+        MUI_LABEL(5, 1, "Pie Graph (MSE)")
+        MUI_STYLE(0)
+        MUI_XY("HR", 0,11)
+        MUI_LABEL(5,17, "Light")
+        MUI_LABEL(37,17, "Time")
+        MUI_LABEL(69,17, "Duty")
+        MUI_STYLE(9)
+        MUI_XYAT("PB", 6, 49, 17, "0|2|4|6|8")
+        MUI_XYAT("PT", 38, 49, 17, "0|2|4|6|8")
+        MUI_XYAT("PD", 70, 49, 17, "0|2|4|6|8")
+        MUI_STYLE(0)
+        MUI_XYAT("GO", 20, 53, 1, " Exit ") 
+
+        MUI_FORM(20)
+        MUI_STYLE(1)
+        MUI_LABEL(5, 8, "Numeric (MUD)")
+        MUI_STYLE(0)
+        MUI_XY("HR", 0,11)
+        MUI_LABEL(5,23, "Light:")
+        MUI_LABEL(5,35, "Time:")
+        MUI_LABEL(5,47, "Duty:")
+        MUI_XY("nB", 50, 23)
+        MUI_XY("nT", 50, 35)
+        MUI_XY("nD", 50, 47)
+        MUI_XYAT("GO", 20, 60, 1, " Exit ") 
+
+        MUI_FORM(22)
+        MUI_STYLE(1)
+        MUI_LABEL(5, 8, "Bar Graph (MUD)")
+        MUI_STYLE(0)
+        MUI_XY("HR", 0,11)
+        MUI_LABEL(5,23, "Light:")
+        MUI_LABEL(5,35, "Time:")
+        MUI_LABEL(5,47, "Duty:")
+        MUI_XY("bB", 50, 23)
+        MUI_XY("bT", 50, 35)
+        MUI_XY("bD", 50, 47)
+        MUI_XYAT("GO", 20, 60, 1, " Exit ") 
+
+        MUI_FORM(24)
+        MUI_STYLE(1)
+        MUI_LABEL(5, 8, "Pie Graph (MUD)")
+        MUI_STYLE(0)
+        MUI_XY("HR", 0,11)
+        MUI_LABEL(5,21, "Light")
+        MUI_LABEL(37,21, "Time")
+        MUI_LABEL(69,21, "Duty")
+        MUI_STYLE(9)
+        MUI_XYAT("pB", 6, 49, 21, "0|2|4|6|8")
+        MUI_XYAT("pT", 38, 49, 21, "0|2|4|6|8")
+        MUI_XYAT("pD", 70, 49, 21, "0|2|4|6|8")
+        MUI_STYLE(0)
+        MUI_XYAT("GO", 20, 60, 1, " Exit ") 
         ;
 
+ muif_t muif_list[] = {
+        MUIF_U8G2_FONT_STYLE(0, u8g2_font_helvR08_tr),
+        MUIF_U8G2_FONT_STYLE(1, u8g2_font_helvB08_tr),
+        // MUIF_U8G2_FONT_STYLE(9, u8g2_font_streamline_interface_essential_loading_t),
+        MUIF_U8G2_FONT_STYLE(9, u8g2_font_percent_circle_25_hn),
+
+        MUIF_RO("HR", mui_hrule),
+        MUIF_U8G2_LABEL(),
+        MUIF_RO("GP", mui_u8g2_goto_data),
+        MUIF_BUTTON("GC", mui_u8g2_goto_form_w1_pi),
+
+        MUIF_U8G2_U8_MIN_MAX("NB", &blink_light, 0, 4, mui_u8g2_u8_min_max_wm_mse_pi),
+        MUIF_U8G2_U8_MIN_MAX("NT", &blink_time, 0, 4, mui_u8g2_u8_min_max_wm_mse_pi),
+        MUIF_U8G2_U8_MIN_MAX("ND", &blink_duty, 0, 4, mui_u8g2_u8_min_max_wm_mse_pi),
+
+        MUIF_U8G2_U8_MIN_MAX_STEP("BB", &blink_light, 0, 4, 1, MUI_MMS_4X_BAR, mui_u8g2_u8_bar_wm_mse_pf),
+        MUIF_U8G2_U8_MIN_MAX_STEP("BT", &blink_time, 0, 4, 1, MUI_MMS_4X_BAR, mui_u8g2_u8_bar_wm_mse_pf),
+        MUIF_U8G2_U8_MIN_MAX_STEP("BD", &blink_duty, 0, 4, 1, MUI_MMS_4X_BAR, mui_u8g2_u8_bar_wm_mse_pf),
+
+        MUIF_VARIABLE("PB", &blink_light, mui_u8g2_u8_opt_line_wa_mse_pi),
+        MUIF_VARIABLE("PT", &blink_time, mui_u8g2_u8_opt_line_wa_mse_pi),
+        MUIF_VARIABLE("PD", &blink_duty, mui_u8g2_u8_opt_line_wa_mse_pi),
+
+        MUIF_U8G2_U8_MIN_MAX("nB", &blink_light, 0, 4, mui_u8g2_u8_min_max_wm_mud_pi),
+        MUIF_U8G2_U8_MIN_MAX("nT", &blink_time, 0, 4, mui_u8g2_u8_min_max_wm_mud_pi),
+        MUIF_U8G2_U8_MIN_MAX("nD", &blink_duty, 0, 4, mui_u8g2_u8_min_max_wm_mud_pi),
+
+        MUIF_U8G2_U8_MIN_MAX_STEP("bB", &blink_light, 0, 4, 1, MUI_MMS_4X_BAR, mui_u8g2_u8_bar_wm_mud_pf),
+        MUIF_U8G2_U8_MIN_MAX_STEP("bT", &blink_time, 0, 4, 1, MUI_MMS_4X_BAR, mui_u8g2_u8_bar_wm_mud_pf),
+        MUIF_U8G2_U8_MIN_MAX_STEP("bD", &blink_duty, 0, 4, 1, MUI_MMS_4X_BAR, mui_u8g2_u8_bar_wm_mud_pf),
+
+        MUIF_VARIABLE("pB", &blink_light, mui_u8g2_u8_opt_line_wa_mud_pi),
+        MUIF_VARIABLE("pT", &blink_time, mui_u8g2_u8_opt_line_wa_mud_pi),
+        MUIF_VARIABLE("pD", &blink_duty, mui_u8g2_u8_opt_line_wa_mud_pi),
+
+        /* a button for the menu... */
+        MUIF_BUTTON("GO", mui_u8g2_btn_goto_wm_fi)
+
+    };
+
+
+void display::mui_init()
+{
+
+    // static muif_t muif_list[] = {
+    //     MUIF_U8G2_FONT_STYLE(0, u8g2_font_helvR08_tr), /* define style 0 */
+    //     MUIF_U8G2_LABEL(),                             /* allow MUI_LABEL command */
+    //     MUIF_BUTTON("BN", mui_u8g2_btn_exit_wm_fi)     /* define exit button */
+    // };
+
+    // static fds_t fds_data[] =                /* Don't use comma between the commands! */
+    //     MUI_FORM(1)                          /* This will start the definition of form 1 */
+    //     MUI_STYLE(0)                         /* select the font defined with style 0 */
+    //     MUI_LABEL(5, 15, "Hello U8g2")       /* place text at postion x=5, y=15 */
+    //     MUI_XYT("BN", 64, 30, " Select Me ") /* place a button at pos x=64, y=30 */
+    //     ;
+    u8g2.setFontPosTop();
+    u8g2.setFontDirection(0);
+    
     mui.begin(u8g2, fds_data, muif_list, sizeof(muif_list) / sizeof(muif_t));
-    // mui.gotoForm(/* form_id= */ 1, /* initial_cursor_position= */ 0);
+    mui.gotoForm(/* form_id= */ 1, /* initial_cursor_position= */ 0);
     Serial.println("mui ready");
 }
 
@@ -26,24 +193,16 @@ void display::mui_loop(int enc, bool click)
 
     if (click)
     {
-        Serial.println("CL");
-        if (!mui.isFormActive())
-        {
-            Serial.println("Run form");
-            uint8_t res = mui.gotoForm(1, 0);
-            Serial.printf("res: %llu\n", res);
-        }
-        else
-        {
-            mui.sendSelect();
-        }
+
+        mui.nextField();
+
         is_redraw = 1;
     }
 
     if (enc > 0)
     {
         Serial.println("CW");
-        mui.nextField();
+        mui.sendSelect();
         is_redraw = 1;
     }
     else if (enc < 0)
@@ -65,11 +224,11 @@ void display::mui_loop(int enc, bool click)
     }
     else
     {
-        u8g2.clearBuffer();
-        u8g2.setCursor(0, 20);
-        u8g2.print(millis());
-        u8g2.sendBuffer();
+        // u8g2.clearBuffer();
+        // u8g2.setCursor(0, 20);
+        // u8g2.print(millis());
+        // u8g2.sendBuffer();
 
-        // mui.gotoForm(/* form_id= */ 1, /* initial_cursor_position= */ 0);
+        mui.gotoForm(/* form_id= */ 1, /* initial_cursor_position= */ 0);
     }
 }

@@ -21,8 +21,10 @@ void display::u8g2_box_frame(uint8_t a)
 
 void display::draw_fill_pixels(int w)
 {
-    u8g2.drawStr(0, 0, "drawFull");
-    u8g2.drawBox(0, 10, w, 54);
+    // u8g2.drawStr(0, 0, "drawFull");
+    u8g2.drawBox(0, 0, w, 64);
+    // u8g2.drawLine(1,1,1,63);
+    u8g2.drawFrame(0,0,128,64);
 }
 
 void display::u8g2_disc_circle(uint8_t a)
